@@ -1,8 +1,3 @@
--- ============================================================
--- 04_final_queries.sql
--- Tablas finales sin LIMIT, consumidas directamente por Power BI
--- ============================================================
-
 CREATE TABLE analytics.post_pandemic_recovery AS
 SELECT
     v2019.unit_code, v2019.visitas_2019, v2024.visitas_2024,
@@ -24,7 +19,3 @@ JOIN
     (SELECT unit_code, SUM(recreation_visits) AS visitas_2025 FROM analytics.park_visits WHERE year = 2025 GROUP BY unit_code) v2025
     ON v2015.unit_code = v2025.unit_code
 WHERE v2015.visitas_2015 > 100000;
-
--- Estas 4 tablas de "analytics" son las que se conectan desde Power BI:
---   analytics.park_visits / analytics.park_state
---   analytics.post_pandemic_recovery / analytics.silent_growth
