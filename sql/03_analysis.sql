@@ -1,15 +1,10 @@
--- ============================================================
--- 03_analysis.sql
--- Las 6 queries que responden las preguntas de negocio del proyecto
--- ============================================================
-
--- Pregunta 1: Evolucion historica del total de visitas (1979-2025)
+-- Evolucion historica 1979-2025
 SELECT year, SUM(recreation_visits) AS total_visitas
 FROM analytics.park_visits
 GROUP BY year
 ORDER BY year;
 
--- Pregunta 2: Top 10 parques mas visitados historicamente, y su % del total
+-- Top 10 parques mas visitados
 SELECT
     unit_code,
     SUM(recreation_visits) AS total_visitas,
@@ -19,7 +14,7 @@ GROUP BY unit_code
 ORDER BY total_visitas DESC
 LIMIT 10;
 
--- Pregunta 3: Estacionalidad -- que meses concentran mas visitas
+-- Estacionalidad por mes
 SELECT
     month,
     SUM(recreation_visits) AS total_visitas,
@@ -28,7 +23,7 @@ FROM analytics.park_visits
 GROUP BY month
 ORDER BY month;
 
--- Pregunta 4: Concentracion geografica -- que estados acumulan mas visitas
+-- Concentracion por estado
 SELECT
     ps.state_id,
     SUM(pv.recreation_visits) AS total_visitas,
@@ -39,7 +34,7 @@ GROUP BY ps.state_id
 ORDER BY total_visitas DESC
 LIMIT 15;
 
--- Pregunta 5: Recuperacion post-pandemia -- 2019 vs 2024
+-- Recuperacion post-pandemia 2019 vs 2024
 SELECT
     v2019.unit_code, v2019.visitas_2019, v2024.visitas_2024,
     ROUND(100.0 * (v2024.visitas_2024 - v2019.visitas_2019) / v2019.visitas_2019, 2) AS variacion_porcentual
@@ -52,7 +47,7 @@ WHERE v2019.visitas_2019 > 100000
 ORDER BY variacion_porcentual ASC
 LIMIT 15;
 
--- Pregunta 6: Crecimiento silencioso -- 2015 vs 2025
+-- Crecimiento silencioso 2015 vs 2025
 SELECT
     v2015.unit_code, v2015.visitas_2015, v2025.visitas_2025,
     ROUND(100.0 * (v2025.visitas_2025 - v2015.visitas_2015) / v2015.visitas_2015, 2) AS variacion_porcentual
