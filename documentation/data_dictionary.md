@@ -1,26 +1,28 @@
-# Diccionario de Datos
+# Diccionario de datos
 
-## raw.main_data (carga cruda de Main_Data.csv)
+## raw.main_data
 
-| Columna | Tipo | Descripcion | Ejemplo |
-|---|---|---|---|
-| unit_code | VARCHAR(4) | Codigo oficial de la unidad NPS | YELL (Yellowstone) |
-| year | INTEGER | Ano calendario | 1992 |
-| month | INTEGER | Mes calendario (1-12) | 7 |
-| statistic | VARCHAR(10) | Tipo de estadistica reportada | TRV |
-| value | INTEGER | Valor correspondiente a esa estadistica | 1586 |
+Es la carga cruda de Main_Data.csv, sin modificar.
 
-## raw.state_lookup (carga cruda de Main_State_Data.csv)
-
-Misma estructura que raw.main_data, mas una columna state_id (VARCHAR(2)). Cubre solo 2016-2025. Se usa exclusivamente para construir analytics.park_state.
-
-## Codigos oficiales de la columna Statistic
-
-Fuente: metadata oficial del NPS (NPS_VUStats_Data_2025_metadata.xml).
-
-| Codigo | Definicion oficial | Se usa en este proyecto |
+| Columna | Tipo | Qué es |
 |---|---|---|
-| TRV | Recreation Visits | Si, metrica principal |
+| unit_code | VARCHAR(4) | Código de 4 letras del parque (ej: YELL = Yellowstone) |
+| year | INTEGER | Año |
+| month | INTEGER | Mes (1-12) |
+| statistic | VARCHAR(10) | Qué tipo de estadística es esta fila (ver tabla de abajo) |
+| value | INTEGER | El número correspondiente a esa estadística |
+
+## raw.state_lookup
+
+Mismas columnas que main_data, más `state_id` (el estado, en 2 letras). Solo cubre 2016-2025. La uso únicamente para sacar la relación parque-estado, no para nada más.
+
+## Los códigos de "statistic"
+
+El archivo trae 15 categorías distintas mezcladas en la misma columna. Busqué las definiciones oficiales en la metadata que publica el NPS junto con el dataset:
+
+| Código | Qué significa | ¿Lo usé? |
+|---|---|---|
+| TRV | Recreation Visits | Sí — es la única que uso en todo el proyecto |
 | TNRV | Non-Recreation Visits | No |
 | TV | Total Visits | No |
 | TRVH | Recreation Visitor Hours | No |
@@ -36,33 +38,27 @@ Fuente: metadata oficial del NPS (NPS_VUStats_Data_2025_metadata.xml).
 | TTRV | NPS Campground Overnight Stays (Tent+RV) | No |
 | TRVS | NPS Campground RV Overnight Stays | No |
 
-## analytics.park_visits (tabla limpia)
+## analytics.park_visits
 
-| Columna | Tipo | Descripcion |
+La tabla que uso para casi todo el análisis. 193.696 filas.
+
+| Columna | Tipo | Qué es |
 |---|---|---|
-| unit_code | VARCHAR(4) | Codigo de la unidad NPS |
-| year | INTEGER | Ano |
+| unit_code | VARCHAR(4) | Código del parque |
+| year | INTEGER | Año |
 | month | INTEGER | Mes |
-| recreation_visits | INTEGER | Visitas recreativas (solo statistic = TRV) |
-| visit_date | DATE | Fecha calculada, para series temporales |
+| recreation_visits | INTEGER | Visitas (ya filtrado a TRV) |
+| visit_date | DATE | Fecha armada a partir de year+month, para agrupar más fácil |
 
-Filas: 193.696
+## analytics.park_state
 
-## analytics.park_state (tabla de referencia)
+440 filas — 400 parques, pero 26 aparecen más de una vez porque están repartidos en varios estados (el caso más extremo es el Appalachian Trail, en 14 estados).
 
-| Columna | Tipo | Descripcion |
+| Columna | Tipo | Qué es |
 |---|---|---|
-| unit_code | VARCHAR(4) | Codigo de la unidad NPS |
-| state_id | VARCHAR(2) | Codigo de estado |
-
-Filas: 440 (400 parques; 26 con mas de 1 estado, 3 de ellos con 3 o mas)
+| unit_code | VARCHAR(4) | Código del parque |
+| state_id | VARCHAR(2) | Estado |
 
 ## analytics.post_pandemic_recovery / analytics.silent_growth
 
-| Columna | Tipo | Descripcion |
-|---|---|---|
-| unit_code | VARCHAR(4) | Codigo de la unidad NPS |
-| visitas_YYYY (x2) | BIGINT | Total de visitas del ano de comparacion |
-| variacion_porcentual | NUMERIC | % de cambio entre ambos anos |
-
-Filtro aplicado: solo unidades con mas de 100.000 visitas en el ano base.
+Mismas columnas en las dos: unit_code, las visitas de cada uno de los dos años que comparo, y el % de variación entre ambos. Filtré para quedarme solo con parques que ya tenían más de 100.000 visitas en el año base — si no, los parques chiquitos meten variaciones de +300% que en realidad no dicen nada, solo ruido.
